@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "vdm",
+  "version": "${version}",
+
+  "name": "Villainous Difficulty Multipliers",
+  "description": "Adds toggleable difficulty multipliers. Both that increase and decrease difficulty.",
+  "authors": [
+    "Cartoonish Villain"
+  ],
+  "contact": {
+    "homepage": "",
+    "sources": ""
+  },
+
+  "license": "MIT",
+  "icon": "assets/modid/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.cartoonishvillain.vdm.VDM"
+    ]
+  },
+  "mixins": [
+    "vdm.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.11.3",
+    "fabric": "*",
+    "minecraft": "1.17.x",
+    "java": ">=16"
+  },
+  "suggests": {
+    "immortuoscalyx": "*"
+  }
+}
