@@ -21,7 +21,7 @@
     "sources": ""
   },
   "license": "MIT",
-  "icon": "assets/modid/icon.png",
+  "icon": "assets/vdm/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [

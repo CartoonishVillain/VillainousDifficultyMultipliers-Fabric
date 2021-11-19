@@ -1,9 +1,11 @@
 package com.cartoonishvillain.vdm;
 
+import com.cartoonishvillain.vdm.commands.*;
 import com.cartoonishvillain.vdm.config.VDMConfig;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -13,6 +15,7 @@ public class VDM implements ModInitializer {
 	// That way, it's clear which mod wrote info, warnings, and errors.
 	public static final Logger LOGGER = LogManager.getLogger("vdm");
 	public static VDMConfig config;
+	public static boolean isCalyxLoaded = false;
 	@Override
 	public void onInitialize() {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
@@ -20,5 +23,13 @@ public class VDM implements ModInitializer {
 		// Proceed with mild caution.
 		AutoConfig.register(VDMConfig.class, JanksonConfigSerializer::new);
 		config = AutoConfig.getConfigHolder(VDMConfig.class).getConfig();
+
+		CommandRegistrationCallback.EVENT.register(((dispatcher, dedicated) -> {
+			activateMultiplierCommand.register(dispatcher);
+			CheckMultiplierCommand.register(dispatcher);
+			deactivateMultiplierCommand.register(dispatcher);
+			activeListCommand.register(dispatcher);
+			CommandManager.register(dispatcher);
+		}));
 	}
 }
