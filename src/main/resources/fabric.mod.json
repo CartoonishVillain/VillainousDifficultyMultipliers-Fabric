@@ -3,6 +3,14 @@
   "id": "vdm",
   "version": "${version}",
 
+  "custom": {
+    "cardinal-components": [
+      "vdm:entitydata",
+      "vdm:worlddata",
+      "vdm:leveldata"
+    ]
+  },
+
   "name": "Villainous Difficulty Multipliers",
   "description": "Adds toggleable difficulty multipliers. Both that increase and decrease difficulty.",
   "authors": [
@@ -12,14 +20,21 @@
     "homepage": "",
     "sources": ""
   },
-
   "license": "MIT",
   "icon": "assets/modid/icon.png",
-
   "environment": "*",
   "entrypoints": {
     "main": [
       "com.cartoonishvillain.vdm.VDM"
+    ],
+    "cardinal-components-entity": [
+      "com.cartoonishvillain.vdm.components.ComponentStarter"
+    ],
+    "cardinal-components-world": [
+      "com.cartoonishvillain.vdm.components.ComponentStarter"
+    ],
+    "cardinal-components-level": [
+      "com.cartoonishvillain.vdm.components.ComponentStarter"
     ]
   },
   "mixins": [
