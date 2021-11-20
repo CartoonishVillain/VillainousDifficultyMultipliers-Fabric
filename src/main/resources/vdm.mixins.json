@@ -4,6 +4,8 @@
   "package": "com.cartoonishvillain.vdm.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
+    "LivingDamageMixin",
+    "LivingDamageMixinPlayer"
   ],
   "client": [
   ],
