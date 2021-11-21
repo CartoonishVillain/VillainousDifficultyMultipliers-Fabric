@@ -4,13 +4,21 @@
   "package": "com.cartoonishvillain.vdm.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
+    "AnimalBreedingMixin",
+    "AvailableGoalsAccessor",
+    "CreeperAccessor",
     "DamageSourceInvoker",
+    "GhastAccessor",
     "LivingDamageMixin",
     "LivingDamageMixinPlayer",
     "LivingDeathMixin",
     "LivingDeathMixinPlayer",
+    "LivingGoalAccessor",
     "LivingHealMixin",
-    "PlayerTick"
+    "PlayerTick",
+    "RangedAttackGoalAccessor",
+    "SkeletonAccessor",
+    "WorldJoinEventMixin"
   ],
   "client": [
   ],

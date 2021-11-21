@@ -2,6 +2,9 @@ package com.cartoonishvillain.vdm.components;
 
 import com.cartoonishvillain.vdm.Fatiguedamage;
 import com.cartoonishvillain.vdm.RandomAttackDecider;
+import com.cartoonishvillain.vdm.goals.CrossbowAngerManagement;
+import com.cartoonishvillain.vdm.goals.RangedAngerManagment;
+import com.cartoonishvillain.vdm.mixin.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
@@ -19,12 +22,14 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Creeper;
-import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.monster.Skeleton;
+import net.minecraft.world.entity.monster.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -44,8 +49,36 @@ import static com.cartoonishvillain.vdm.components.ComponentStarter.LEVELINSTANC
 
 public class ComponentTicker {
 
-    //TODO: LivingHealEvent, BabyEntitySpawnEvent, EntityJoinWorldEvent, LivingUpdateEvent, FurnaceFuelBurnTimeEvent,
+    //TODO: LivingUpdateEvent, FurnaceFuelBurnTimeEvent,
     // AnvilRepairEvent, PlayerDestroyItemEvent, Finish Using Item, WorldTick, PlayerWakeUpEvent, Chat event
+
+    public static void SpawnMultipliers(Entity entity){
+        if(entity instanceof LivingEntity && !entity.level.isClientSide){
+            LevelComponent h = LEVELINSTANCE.get(entity.level.getLevelData());
+
+            seedRetaliation((LivingEntity) entity);
+
+            if(h.isHardened() && entity instanceof Monster) Hardened((LivingEntity) entity);
+
+            if(h.isAnger()) Anger((LivingEntity) entity);
+
+            if(h.isUnstable() && (entity.getType().equals(EntityType.GHAST) || entity.getType().equals(EntityType.CREEPER))) Unstable((LivingEntity) entity);
+
+            seedWrong((LivingEntity) entity);
+        }
+
+    }
+
+
+
+    public static void Aging(LivingEntity victim1, LivingEntity victim2){
+        EntityComponent h = ENTITYINSTANCE.get(victim1);
+        h.setAge(h.getAge()+1);
+        agecheck(h.getAge(), victim1);
+        h = ENTITYINSTANCE.get(victim2);
+        h.setAge(h.getAge()+1);
+        agecheck(h.getAge(), victim2);
+    }
 
     public static void LivingDamageMultipliers(LivingEntity victim, DamageSource source, float Amount){
         if(!victim.level.isClientSide){
@@ -321,5 +354,97 @@ public class ComponentTicker {
 
     private static void broadcast(MinecraftServer server, Component translationTextComponent){
         server.getPlayerList().broadcastMessage(translationTextComponent, ChatType.CHAT, UUID.randomUUID());
+    }
+
+    public static void seedWrong(LivingEntity e){
+        EntityType eType = e.getType();
+        if(eType == EntityType.ENDERMAN || eType == EntityType.ZOMBIFIED_PIGLIN || eType == EntityType.WOLF || eType == EntityType.BEE || eType == EntityType.LLAMA){
+            Random random = new Random();
+            int chance = random.nextInt(30);
+            if(chance <= 1) {
+                EntityComponent h = ENTITYINSTANCE.get(e);
+                h.setWrongStatus(true);
+            }
+        }
+
+    }
+
+    public static void Unstable(LivingEntity entity){
+        if(entity.getType().equals(EntityType.GHAST)){
+            Ghast ghast = (Ghast) entity;
+            ((GhastAccessor) ghast).vdmSetExplosive(5);
+        } else if(entity.getType().equals(EntityType.CREEPER)){
+            Creeper creeper = (Creeper) entity;
+            ((CreeperAccessor) creeper).vdmCSetExplosive(5);
+        }
+    }
+
+    public static void Anger(LivingEntity entity){
+        if (entity.getType().equals(EntityType.SKELETON) || entity.getType().equals(EntityType.STRAY)) {
+            AbstractSkeleton abstractSkeletonEntity = (AbstractSkeleton) entity;
+            try {
+                RangedBowAttackGoal<AbstractSkeleton> rangedBowAttackGoal = ((SkeletonAccessor) abstractSkeletonEntity).vdmGetBowGoal();
+                if (abstractSkeletonEntity.level.getDifficulty() != Difficulty.HARD)
+                    rangedBowAttackGoal.setMinAttackInterval(30);
+                else rangedBowAttackGoal.setMinAttackInterval(15);
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+            }
+
+        }
+        if(entity.getType().equals(EntityType.PILLAGER)){
+            Pillager pillagerEntity = (Pillager) entity;
+            GoalSelector pillagerGoalSelector = ((LivingGoalAccessor) pillagerEntity).vdmGetMobGoalSelector();
+            Set<WrappedGoal> prioritizedGoals = ((AvailableGoalsAccessor) pillagerGoalSelector).vdmGetAvailableGoals();
+            Goal toremove = null;
+            for(WrappedGoal prioritizedGoal : prioritizedGoals){
+                if(prioritizedGoal.getGoal() instanceof RangedCrossbowAttackGoal){
+                    toremove = prioritizedGoal.getGoal();
+                    if(toremove != null) break;
+                }
+            }
+            if(toremove != null){
+                pillagerGoalSelector.removeGoal(toremove);
+                pillagerGoalSelector.addGoal(3, new CrossbowAngerManagement(pillagerEntity, 1.5D, 8.0F));
+            }
+        }if(entity.getType().equals(EntityType.WITCH)){
+            Witch witchEntity = (Witch) entity;
+            GoalSelector witchGoalSelector = ((LivingGoalAccessor) witchEntity).vdmGetMobGoalSelector();
+            Set<WrappedGoal> prioritizedGoals = ((AvailableGoalsAccessor) witchGoalSelector).vdmGetAvailableGoals();
+            Goal toremove = null;
+            for(WrappedGoal prioritizedGoal : prioritizedGoals) {
+                if (prioritizedGoal.getGoal() instanceof RangedAttackGoal) {
+                    toremove = prioritizedGoal.getGoal();
+                    if (toremove != null) break;
+                }
+            }
+            if(toremove != null){
+                witchGoalSelector.removeGoal(toremove);
+                witchGoalSelector.addGoal(3, new RangedAngerManagment(witchEntity, 1.0D, 60, 10.0F));
+            }
+        }
+
+    }
+
+    public static void Hardened(LivingEntity entity){
+        float health = (entity).getHealth() * 0.5f;
+        AttributeInstance modifiableAttributeInstance = (entity).getAttribute(Attributes.MAX_HEALTH);
+        if (modifiableAttributeInstance == null) {
+            return;
+        }
+        if(modifiableAttributeInstance.getModifiers().size() == 0) {
+            modifiableAttributeInstance.addTransientModifier(new AttributeModifier(UUID.fromString("D6F0BA2-1186-46AC-B896-C61C5CEE99CC"), "Hardened health boost", health, AttributeModifier.Operation.ADDITION));
+            (entity).setHealth((entity).getHealth() * 1.5f);
+        }
+    }
+
+    public static void seedRetaliation(LivingEntity entity){
+        EntityType eType = entity.getType();
+        if(eType == EntityType.PIG || eType == EntityType.SHEEP || eType == EntityType.COW || eType == EntityType.MOOSHROOM || eType == EntityType.CHICKEN){
+            Random random = new Random();
+            int chance = random.nextInt(20);
+            EntityComponent h = new EntityComponent(entity);
+            h.setRetaliationStatus(true);
+        }
     }
 }
