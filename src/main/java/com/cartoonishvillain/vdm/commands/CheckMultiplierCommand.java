@@ -44,9 +44,11 @@ public class CheckMultiplierCommand  {
                     return check(context.getSource(), "kinetic");
                 })).then(Commands.literal("undying").executes(context -> {
                     return check(context.getSource(), "undying");
-                })).then(Commands.literal("fuelefficient").executes(context -> {
-                    return check(context.getSource(), "fuelefficient");
-                })).then(Commands.literal("blacksmithing").executes(context -> {
+                }))
+//                        .then(Commands.literal("fuelefficient").executes(context -> {
+//                    return check(context.getSource(), "fuelefficient");
+//                }))
+                        .then(Commands.literal("blacksmithing").executes(context -> {
                     return check(context.getSource(), "blacksmithing");
                 })).then(Commands.literal("warranty").executes(context -> {
                     return check(context.getSource(), "warranty");

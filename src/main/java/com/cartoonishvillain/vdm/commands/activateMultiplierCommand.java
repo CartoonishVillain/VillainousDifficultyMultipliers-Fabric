@@ -46,9 +46,12 @@ public class activateMultiplierCommand {
                     return activate(context.getSource(), "kinetic");
                 })).then(Commands.literal("undying").executes(context -> {
                     return activate(context.getSource(), "undying");
-                })).then(Commands.literal("fuelefficient").executes(context -> {
-                    return activate(context.getSource(), "fuelefficient");
-                })).then(Commands.literal("blacksmithing").executes(context -> {
+                }))
+                        //Can't figure out how to change values. TODO: Fix this the issue mentioned before this.
+//                        .then(Commands.literal("fuelefficient").executes(context -> {
+//                    return activate(context.getSource(), "fuelefficient");
+//                }))
+                        .then(Commands.literal("blacksmithing").executes(context -> {
                     return activate(context.getSource(), "blacksmithing");
                 })).then(Commands.literal("warranty").executes(context -> {
                     return activate(context.getSource(), "warranty");

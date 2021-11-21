@@ -47,9 +47,11 @@ public class deactivateMultiplierCommand {
                     return deactivate(context.getSource(), "kinetic");
                 })).then(Commands.literal("undying").executes(context -> {
                     return deactivate(context.getSource(), "undying");
-                })).then(Commands.literal("fuelefficient").executes(context -> {
-                    return deactivate(context.getSource(), "fuelefficient");
-                })).then(Commands.literal("blacksmithing").executes(context -> {
+                }))
+//                        .then(Commands.literal("fuelefficient").executes(context -> {
+//                    return deactivate(context.getSource(), "fuelefficient");
+//                }))
+                        .then(Commands.literal("blacksmithing").executes(context -> {
                     return deactivate(context.getSource(), "blacksmithing");
                 })).then(Commands.literal("warranty").executes(context -> {
                     return deactivate(context.getSource(), "warranty");

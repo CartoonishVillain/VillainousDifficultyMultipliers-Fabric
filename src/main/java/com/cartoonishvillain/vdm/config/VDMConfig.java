@@ -49,8 +49,8 @@ public class VDMConfig implements ConfigData {
         public boolean kinetic = false;
         @Comment("When you are about to die, you're instantly brought back to full health. Allows you to get back into the fight immediately, but does still increase your death counters.")
         public boolean undying = false;
-        @Comment("Modern furnaces can get 4 times the use out of fuel.")
-        public boolean fuelefficient = false;
+//        @Comment("Modern furnaces can get 4 times the use out of fuel.")
+//        public boolean fuelefficient = false;
         @Comment("Stronger understanding of proper anvil usage makes you less likely to damage it.")
         public boolean blacksmithing = false;
         @Comment("Tools may be replaced when they are destroyed.")
