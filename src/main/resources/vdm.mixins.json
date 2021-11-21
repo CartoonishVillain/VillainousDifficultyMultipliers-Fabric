@@ -13,6 +13,7 @@
     "LivingDamageMixinPlayer",
     "LivingDeathMixin",
     "LivingDeathMixinPlayer",
+    "LivingEntityTick",
     "LivingGoalAccessor",
     "LivingHealMixin",
     "PlayerTick",

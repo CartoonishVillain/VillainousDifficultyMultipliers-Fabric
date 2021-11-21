@@ -2,6 +2,7 @@ package com.cartoonishvillain.vdm.components;
 
 import com.cartoonishvillain.vdm.Fatiguedamage;
 import com.cartoonishvillain.vdm.RandomAttackDecider;
+import com.cartoonishvillain.vdm.VDM;
 import com.cartoonishvillain.vdm.goals.CrossbowAngerManagement;
 import com.cartoonishvillain.vdm.goals.RangedAngerManagment;
 import com.cartoonishvillain.vdm.mixin.*;
@@ -18,14 +19,12 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.ExperienceOrb;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -43,14 +42,23 @@ import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.cartoonishvillain.vdm.components.ComponentStarter.ENTITYINSTANCE;
 import static com.cartoonishvillain.vdm.components.ComponentStarter.LEVELINSTANCE;
 
 public class ComponentTicker {
 
-    //TODO: LivingUpdateEvent, FurnaceFuelBurnTimeEvent,
+    //TODO: FurnaceFuelBurnTimeEvent,
     // AnvilRepairEvent, PlayerDestroyItemEvent, Finish Using Item, WorldTick, PlayerWakeUpEvent, Chat event
+
+    public static void LivingTickMethod(LivingEntity entity){
+        LevelComponent h = LEVELINSTANCE.get(entity.level.getLevelData());
+        if(h.isFlammable()) flammableUpdate(entity);
+
+        if(h.isWrong() && entity.tickCount == 100) activateWrong(entity);
+
+    }
 
     public static void SpawnMultipliers(Entity entity){
         if(entity instanceof LivingEntity && !entity.level.isClientSide){
@@ -111,6 +119,8 @@ public class ComponentTicker {
             if (h.isFatigue()) Fatigue(victim);
 
             shoutTicksCount(victim);
+
+            if(h.isFlammable()) flammableUpdate(victim);
         }
     }
 
@@ -239,7 +249,7 @@ public class ComponentTicker {
     }
 
     public static void Eruptive(Bee aggressor){
-        aggressor.level.explode(aggressor, aggressor.getX(), aggressor.getY(), aggressor.getZ(), 4, Explosion.BlockInteraction.NONE);
+        aggressor.level.explode(null, aggressor.getX(), aggressor.getY(), aggressor.getZ(), 4, Explosion.BlockInteraction.NONE);
 
     }
 
@@ -445,6 +455,31 @@ public class ComponentTicker {
             int chance = random.nextInt(20);
             EntityComponent h = new EntityComponent(entity);
             h.setRetaliationStatus(true);
+        }
+    }
+
+    public static void flammableUpdate(LivingEntity entity){
+        if(!entity.level.isClientSide()){
+            if(entity.getRemainingFireTicks() > 1){entity.setRemainingFireTicks(20);}
+        }
+    }
+
+    public static void activateWrong(LivingEntity livingEntity){
+        EntityComponent h = ENTITYINSTANCE.get(livingEntity);
+        EntityType eType = livingEntity.getType();
+        if (h.getWrongStatus()){
+            GoalSelector targetSelector = ((LivingGoalAccessor) livingEntity).vdmGetMobTargetSelector();
+            Set<WrappedGoal> prioritizedGoals = ((AvailableGoalsAccessor) targetSelector).vdmGetAvailableGoals();
+            ArrayList<Goal> toRemove = new ArrayList<>();
+            if(prioritizedGoals != null) {
+                for (WrappedGoal prioritizedGoal : prioritizedGoals) {
+                    toRemove.add(prioritizedGoal.getGoal());
+                }
+            }
+            for(Goal goal : toRemove){
+                targetSelector.removeGoal(goal);
+            }
+            targetSelector.addGoal(3, new NearestAttackableTargetGoal<Player>((Mob) livingEntity, Player.class, true, false));
         }
     }
 }

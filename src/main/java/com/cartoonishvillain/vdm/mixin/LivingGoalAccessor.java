@@ -12,4 +12,7 @@ public interface LivingGoalAccessor
 {
     @Accessor("goalSelector")
     GoalSelector vdmGetMobGoalSelector();
+
+    @Accessor("targetSelector")
+    GoalSelector vdmGetMobTargetSelector();
 }
