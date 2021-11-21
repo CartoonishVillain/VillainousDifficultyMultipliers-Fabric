@@ -1,38 +1,50 @@
 package com.cartoonishvillain.vdm.components;
 
+import com.cartoonishvillain.vdm.Fatiguedamage;
 import com.cartoonishvillain.vdm.RandomAttackDecider;
-import com.cartoonishvillain.vdm.VDM;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.ServerStatsCounter;
+import net.minecraft.stats.Stats;
+import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.Bee;
+import net.minecraft.world.entity.animal.Wolf;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.monster.Skeleton;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.phys.Vec3;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 import static com.cartoonishvillain.vdm.components.ComponentStarter.ENTITYINSTANCE;
 import static com.cartoonishvillain.vdm.components.ComponentStarter.LEVELINSTANCE;
 
 public class ComponentTicker {
 
-    //TODO: PlayerTickEvent, LivingDeathEvent, LivingHealEvent, BabyEntitySpawnEvent, EntityJoinWorldEvent, LivingUpdateEvent, FurnaceFuelBurnTimeEvent,
+    //TODO: LivingHealEvent, BabyEntitySpawnEvent, EntityJoinWorldEvent, LivingUpdateEvent, FurnaceFuelBurnTimeEvent,
     // AnvilRepairEvent, PlayerDestroyItemEvent, Finish Using Item, WorldTick, PlayerWakeUpEvent, Chat event
 
     public static void LivingDamageMultipliers(LivingEntity victim, DamageSource source, float Amount){
@@ -57,6 +69,139 @@ public class ComponentTicker {
             if(h.isInferno() && source.equals(DamageSource.ON_FIRE)) Inferno(victim, Amount);
 
             if(h.isEruptiveswarm() && source.getEntity() != null && source.getEntity().getType().equals(EntityType.BEE)) Eruptive((Bee) source.getEntity());
+        }
+    }
+
+    public static void PlayerTickMethod(Player victim){
+        LevelComponent h = LEVELINSTANCE.get(victim.level.getLevelData());
+        if(!victim.level.isClientSide) {
+            if (h.isFatigue()) Fatigue(victim);
+
+            shoutTicksCount(victim);
+        }
+    }
+
+    public static void LivingDeathMultipliers(LivingEntity victim, DamageSource damageSource, CallbackInfo ci){
+        LevelComponent h = LEVELINSTANCE.get(victim.level.getLevelData());
+        if(!victim.level.isClientSide) {
+            if (victim instanceof Player && h.isUndying()){
+                ci.cancel();
+                undying((Player) victim);
+            }
+
+            if(victim.getType().equals(EntityType.CREEPER) && h.isCannon()){
+                Cannon((Creeper) victim, damageSource);
+            }
+        }
+    }
+
+    public static void LivingHealthMultipliers(LivingEntity victim, float f, CallbackInfo ci){
+        LevelComponent h = LEVELINSTANCE.get(victim.level.getLevelData());
+        if(h.isBlackeye() && victim instanceof Player player){
+            EntityComponent i = ENTITYINSTANCE.get(victim);
+            if(i.getBlackEyeStatus()) ci.cancel();
+        }
+    }
+
+    public static void Cannon(Creeper creeperEntity, DamageSource damageSource){
+        boolean loot = true;
+        if (damageSource.getEntity() == creeperEntity){loot = false;} //creeper naturally exploded. No loot!
+        if (creeperEntity.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)){loot = false;}
+        Explosion.BlockInteraction explosion$mode = creeperEntity.level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) ? Explosion.BlockInteraction.DESTROY : Explosion.BlockInteraction.NONE;
+        float f = creeperEntity.isPowered() ? 2.0F : 1.0F;
+        Vec3 vector3d = new Vec3(creeperEntity.getX(), creeperEntity.getY(), creeperEntity.getZ());
+        creeperEntity.level.explode(creeperEntity, creeperEntity.getX(), creeperEntity.getY(), creeperEntity.getZ(), (float)3 * f, explosion$mode);
+        creeperEntity.remove(Entity.RemovalReason.KILLED);
+        //Phase 2 - artificial loot table.
+        if(loot){
+            Entity aggressor = damageSource.getEntity();
+            if(aggressor instanceof Player || aggressor instanceof Wolf){
+                ExperienceOrb experienceOrbEntity = new ExperienceOrb(aggressor.level, creeperEntity.getX(), creeperEntity.getY(), creeperEntity.getZ(), 5);
+                ItemEntity itemEntity = new ItemEntity(EntityType.ITEM, aggressor.level);
+                int maxgun = 2;
+                if(aggressor instanceof Player){
+                    Map<Enchantment, Integer> map =  EnchantmentHelper.getEnchantments(((Player) aggressor).getMainHandItem());
+                    if(map.containsKey(Enchantments.MOB_LOOTING)){
+                        maxgun = 2 + map.get(Enchantments.MOB_LOOTING);
+                    }
+                }
+                Random random = new Random();
+                int gunpowderamount = random.nextInt(maxgun+1); // accounting for 0. I don't think it shows up in randoms.
+                itemEntity.setItem(new ItemStack(Items.GUNPOWDER, gunpowderamount));
+                experienceOrbEntity.setPos(vector3d.x, vector3d.y, vector3d.z);
+                itemEntity.setPos(vector3d.x, vector3d.y, vector3d.z);
+                aggressor.level.addFreshEntity(experienceOrbEntity);
+                aggressor.level.addFreshEntity(itemEntity);
+            }
+            else if(aggressor instanceof Skeleton){
+                ItemEntity itemEntity = new ItemEntity(EntityType.ITEM, aggressor.level);
+                Random random = new Random();
+                int gunpowderamount = random.nextInt(3);
+                itemEntity.setItem(new ItemStack(Items.GUNPOWDER, gunpowderamount));
+                ItemEntity Disc = new ItemEntity(EntityType.ITEM, aggressor.level);
+                Disc.setItem(new ItemStack(MusicDisc(), 1));
+                itemEntity.setPos(vector3d.x, vector3d.y, vector3d.z);
+                Disc.setPos(vector3d.x, vector3d.y, vector3d.z);
+                aggressor.level.addFreshEntity(itemEntity);
+                aggressor.level.addFreshEntity(Disc);
+            }else if(aggressor instanceof Creeper && ((Creeper) aggressor).canDropMobsSkull()){
+                ItemEntity itemEntity = new ItemEntity(EntityType.ITEM, aggressor.level);
+                Random random = new Random();
+                int gunpowderamount = random.nextInt(3);
+                itemEntity.setItem(new ItemStack(Items.GUNPOWDER, gunpowderamount));
+                ItemEntity Skull = new ItemEntity(EntityType.ITEM, aggressor.level);
+                Skull.setItem(new ItemStack(Items.CREEPER_HEAD, 1));
+                itemEntity.setPos(vector3d.x, vector3d.y, vector3d.z);
+                Skull.setPos(vector3d.x, vector3d.y, vector3d.z);
+                aggressor.level.addFreshEntity(itemEntity);
+                aggressor.level.addFreshEntity(Skull);
+
+            }
+        }
+    }
+
+    public static void undying(Player victim){
+        victim.setHealth(victim.getMaxHealth());
+    }
+
+    public static void shoutTicksCount(Player victim){
+        EntityComponent h = ENTITYINSTANCE.get(victim);
+        if(h.getShoutTicks() > 0) h.setShoutTicks(h.getShoutTicks() - 1);
+    }
+
+    public static void Fatigue(Player victim){
+        ServerStatsCounter serverstatisticsmanager = ((ServerPlayer)victim).getStats();
+        int sleeptime = Mth.clamp(serverstatisticsmanager.getValue(Stats.CUSTOM.get(Stats.TIME_SINCE_REST)), 1, Integer.MAX_VALUE);
+        Random random = new Random();
+        int chance = random.nextInt(50000);
+        if(sleeptime > 72000 & sleeptime < 84000){
+            if(chance <= 12){
+                victim.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60*20, 0));
+                victim.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 60*20, 0));
+            }
+        }else if(sleeptime >= 84000 && sleeptime <= 96000){
+            if(chance <= 10){
+                victim.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 60*20, 0));
+                victim.addEffect(new MobEffectInstance(MobEffects.HUNGER, 60*20, 0));
+            } if(chance <= 15){
+                victim.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 45*20, 1));
+                victim.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60*20, 1));
+                victim.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 60*20, 1));
+            }
+        }else if(sleeptime > 96000 && sleeptime <= 132000){
+            if(chance <= 10){
+                victim.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 70*20, 0));
+                victim.addEffect(new MobEffectInstance(MobEffects.HUNGER, 70*20, 0));
+            }if(chance <= 13){
+                victim.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 45*20, 0));
+            }
+            if(chance <= 17){
+                victim.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 45*20, 2));
+                victim.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60*20, 2));
+                victim.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 60*20, 2));
+            }
+        }else if(sleeptime > 132000){
+            if (chance < 49000) victim.hurt(Fatiguedamage.causeFatigueDamage(victim), 1);
         }
     }
 
