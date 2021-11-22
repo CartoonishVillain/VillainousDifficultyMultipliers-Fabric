@@ -18,6 +18,7 @@
     "LivingEntityTick",
     "LivingGoalAccessor",
     "LivingHealMixin",
+    "LocalChatMixin",
     "PlayerSleepMixin",
     "PlayerTick",
     "RangedAttackGoalAccessor",

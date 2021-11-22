@@ -55,7 +55,7 @@ import static com.cartoonishvillain.vdm.components.ComponentStarter.LEVELINSTANC
 public class ComponentTicker {
 
     //TODO:
-    // WorldTick, PlayerWakeUpEvent, Chat event
+    // Chat event
 
     public static void LivingTickMethod(LivingEntity entity){
         LevelComponent h = LEVELINSTANCE.get(entity.level.getLevelData());
@@ -367,7 +367,7 @@ public class ComponentTicker {
     }
 
 
-    private static void broadcast(MinecraftServer server, Component translationTextComponent){
+    public static void broadcast(MinecraftServer server, Component translationTextComponent){
         server.getPlayerList().broadcastMessage(translationTextComponent, ChatType.CHAT, UUID.randomUUID());
     }
 
