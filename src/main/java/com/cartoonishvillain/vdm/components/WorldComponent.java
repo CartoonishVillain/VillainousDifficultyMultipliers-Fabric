@@ -2,6 +2,7 @@ package com.cartoonishvillain.vdm.components;
 
 import dev.onyxstudios.cca.api.v3.component.ComponentV3;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.AxeItem;
 
 public class WorldComponent implements ComponentV3 {
     protected boolean isNight = false;

@@ -38,8 +38,11 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -49,7 +52,7 @@ import static com.cartoonishvillain.vdm.components.ComponentStarter.LEVELINSTANC
 
 public class ComponentTicker {
 
-    //TODO: FurnaceFuelBurnTimeEvent,
+    //TODO:
     // AnvilRepairEvent, PlayerDestroyItemEvent, Finish Using Item, WorldTick, PlayerWakeUpEvent, Chat event
 
     public static void LivingTickMethod(LivingEntity entity){
@@ -480,6 +483,16 @@ public class ComponentTicker {
                 targetSelector.removeGoal(goal);
             }
             targetSelector.addGoal(3, new NearestAttackableTargetGoal<Player>((Mob) livingEntity, Player.class, true, false));
+        }
+    }
+
+    public static void blackSmithing(BlockState blockState, CallbackInfoReturnable<BlockState> cir){
+        LevelComponent levelComponent = LEVELINSTANCE.get(VDM.levelData);
+        if(levelComponent.isBlacksmithing()){
+            Random random = new Random();
+            if(random.nextBoolean()){
+                cir.setReturnValue(blockState);
+            }
         }
     }
 }

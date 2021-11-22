@@ -24,7 +24,7 @@ public class LevelComponent implements ComponentV3 {
     protected boolean eruptiveswarm = VDM.config.defaultMultipliers.eruptiveswarm;
     protected boolean kinetic = VDM.config.defaultMultipliers.kinetic;
     protected boolean undying = VDM.config.defaultMultipliers.undying;
-    protected boolean fuelefficient = VDM.config.defaultMultipliers.fuelefficient;
+    protected boolean fuelefficient = false; //VDM.config.defaultMultipliers.fuelefficient;
     protected boolean blacksmithing = VDM.config.defaultMultipliers.blacksmithing;
     protected boolean warranty = VDM.config.defaultMultipliers.warranty;
     protected boolean celebration = VDM.config.defaultMultipliers.celebration;
