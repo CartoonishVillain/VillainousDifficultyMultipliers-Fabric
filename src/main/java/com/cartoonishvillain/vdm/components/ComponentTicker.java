@@ -7,8 +7,13 @@ import com.cartoonishvillain.vdm.goals.CrossbowAngerManagement;
 import com.cartoonishvillain.vdm.goals.RangedAngerManagment;
 import com.cartoonishvillain.vdm.mixin.*;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -30,22 +35,19 @@ import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.*;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 import static com.cartoonishvillain.vdm.components.ComponentStarter.ENTITYINSTANCE;
 import static com.cartoonishvillain.vdm.components.ComponentStarter.LEVELINSTANCE;
@@ -53,7 +55,7 @@ import static com.cartoonishvillain.vdm.components.ComponentStarter.LEVELINSTANC
 public class ComponentTicker {
 
     //TODO:
-    // AnvilRepairEvent, PlayerDestroyItemEvent, Finish Using Item, WorldTick, PlayerWakeUpEvent, Chat event
+    // PlayerDestroyItemEvent, Finish Using Item, WorldTick, PlayerWakeUpEvent, Chat event
 
     public static void LivingTickMethod(LivingEntity entity){
         LevelComponent h = LEVELINSTANCE.get(entity.level.getLevelData());
@@ -494,5 +496,26 @@ public class ComponentTicker {
                 cir.setReturnValue(blockState);
             }
         }
+    }
+
+    public static <T extends LivingEntity> void Warranty(int i, T livingEntity, Consumer<T> consumer, ItemStack itemStack, CallbackInfo ci){
+        LevelComponent h = LEVELINSTANCE.get(livingEntity.level.getLevelData());
+        if(h.isWarranty() && !livingEntity.level.isClientSide){
+            Item item =  itemStack.getItem();
+            if((item instanceof DiggerItem || item instanceof FlintAndSteelItem) && itemStack.getDamageValue() == itemStack.getMaxDamage()-1){
+
+                String name = itemStack.getHoverName().getString();
+                Map<Enchantment, Integer> enchants = EnchantmentHelper.deserializeEnchantments(itemStack.getEnchantmentTags().copy());
+                ItemStack replacement = new ItemStack(itemStack.getItem(), 1);
+                replacement.setHoverName(new TextComponent(name));
+                EnchantmentHelper.setEnchantments(enchants, replacement);
+                BlockPos blockPos = livingEntity.getOnPos();
+                ItemEntity itemEntity = new ItemEntity(EntityType.ITEM, livingEntity.level);
+                itemEntity.setItem(replacement);
+                itemEntity.setPos(Vec3.atCenterOf(blockPos));
+                livingEntity.level.addFreshEntity(itemEntity);
+            }
+        }
+
     }
 }
