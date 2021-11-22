@@ -292,6 +292,6 @@ public class LevelComponent implements ComponentV3 {
         tag.putBoolean("celebration", celebration);
         tag.putBoolean("rested", rested);
         tag.putBoolean("wild", wild);
-        tag.putBoolean("rested", rested);
+        tag.putBoolean("pandemic", pandemic);
     }
 }

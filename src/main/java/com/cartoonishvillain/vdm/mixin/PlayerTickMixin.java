@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ServerPlayer.class)
-public class PlayerTick {
+public class PlayerTickMixin {
     @Inject(at = @At("TAIL"), method = "tick")
     private void vdmattackplayer(CallbackInfo ci){
         Player victim = ((Player) (Object) this);

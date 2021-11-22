@@ -12,6 +12,7 @@ import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.TextComponent;
@@ -62,6 +63,9 @@ public class VDM implements ModInitializer {
 		}));
 
 		registerPackets();
+
+		isCalyxLoaded = FabricLoader.getInstance().isModLoaded("immortuoscalyx");
+
 
 		ServerTickEvents.END_WORLD_TICK.register(WorldTickListener.getInstance());
 	}

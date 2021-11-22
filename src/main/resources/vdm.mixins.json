@@ -8,6 +8,7 @@
     "AnvilRepairMixin",
     "AvailableGoalsAccessor",
     "CreeperAccessor",
+    "CrossbowRangedAttackGoalAccessor",
     "DamageSourceInvoker",
     "GhastAccessor",
     "ItemBreakMixin",
@@ -20,10 +21,11 @@
     "LivingHealMixin",
     "LocalChatMixin",
     "PlayerSleepMixin",
-    "PlayerTick",
+    "PlayerTickMixin",
     "RangedAttackGoalAccessor",
     "SkeletonAccessor",
     "VegetarianMixin",
+    "VillagerBreedingMixin",
     "WorldJoinEventMixin"
   ],
   "client": [

@@ -12,6 +12,8 @@ public class VDMConfig implements ConfigData {
     public DefaultMultipliers defaultMultipliers = new DefaultMultipliers();
 
     public static class DefaultMultipliers{
+        @Comment("Config options only apply on world creation for the fabric port! For later enabling or disabling in existing worlds, use the commands! /vdm help for more info!")
+        public boolean notice = false;
         @Comment("We all get old at some point. Upon breeding 4 times, animals and villagers will die of old age.")
         public boolean aging = false;
         @Comment("When you take damage, your ability to heal is nullified until you hit a monster or a player with a melee attack. Punch 'em in the chin!")

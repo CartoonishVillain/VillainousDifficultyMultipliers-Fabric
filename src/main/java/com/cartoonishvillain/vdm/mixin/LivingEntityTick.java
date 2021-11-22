@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(LivingEntity.class)
 public class LivingEntityTick {
     @Inject(at = @At("TAIL"), method = "tick")
-    private void vdmattackplayer(CallbackInfo ci){
+    private void vdmtickplayer(CallbackInfo ci){
         LivingEntity victim = ((LivingEntity) (Object) this);
         ComponentTicker.LivingTickMethod(victim);
     }

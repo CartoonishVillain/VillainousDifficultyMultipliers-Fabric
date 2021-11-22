@@ -1,5 +1,7 @@
 package com.cartoonishvillain.vdm.components;
 
+import com.cartoonishvillain.immortuoscalyx.component.InfectionComponent;
+import com.cartoonishvillain.immortuoscalyx.component.InfectionHandler;
 import com.cartoonishvillain.vdm.Fatiguedamage;
 import com.cartoonishvillain.vdm.RandomAttackDecider;
 import com.cartoonishvillain.vdm.VDM;
@@ -49,13 +51,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.*;
 import java.util.function.Consumer;
 
+import static com.cartoonishvillain.immortuoscalyx.component.ComponentStarter.INFECTION;
 import static com.cartoonishvillain.vdm.components.ComponentStarter.ENTITYINSTANCE;
 import static com.cartoonishvillain.vdm.components.ComponentStarter.LEVELINSTANCE;
 
 public class ComponentTicker {
-
-    //TODO:
-    // Chat event
 
     public static void LivingTickMethod(LivingEntity entity){
         LevelComponent h = LEVELINSTANCE.get(entity.level.getLevelData());
@@ -95,8 +95,9 @@ public class ComponentTicker {
 
     public static void LivingDamageMultipliers(LivingEntity victim, DamageSource source, float Amount){
         if(!victim.level.isClientSide){
-            //TODO: PANDEMIC
             LevelComponent h = LEVELINSTANCE.get(victim.level.getLevelData());
+
+            if(h.isPandemic() && VDM.isCalyxLoaded && victim instanceof Player) Pandemic((Player)victim);
 
             if(h.isSoftskin() && victim instanceof Player) softSkin((Player)victim, source, Amount);
 
@@ -149,6 +150,11 @@ public class ComponentTicker {
             EntityComponent i = ENTITYINSTANCE.get(victim);
             if(i.getBlackEyeStatus()) ci.cancel();
         }
+    }
+
+    public static void Pandemic(Player victim){
+        InfectionComponent h = INFECTION.get(victim);
+        InfectionHandler.infectEntity(victim, 5, 1);
     }
 
     public static void Cannon(Creeper creeperEntity, DamageSource damageSource){

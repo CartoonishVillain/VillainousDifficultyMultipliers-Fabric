@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(LivingEntity.class)
 public class LivingDeathMixin {
     @Inject(at = @At("HEAD"), method = "die")
-    private void vdmattack(DamageSource damageSource, CallbackInfo ci){
+    private void vdmdie(DamageSource damageSource, CallbackInfo ci){
         LivingEntity victim = ((LivingEntity) (Object) this);
         ComponentTicker.LivingDeathMultipliers(victim, damageSource, ci);
 

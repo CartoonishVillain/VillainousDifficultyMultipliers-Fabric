@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ServerPlayer.class)
 public class LivingDeathMixinPlayer {
     @Inject(at = @At("TAIL"), method = "die", cancellable = true)
-    private void vdmattackplayer(DamageSource damageSource, CallbackInfo ci){
+    private void vdmdieplayer(DamageSource damageSource, CallbackInfo ci){
         LivingEntity victim = ((LivingEntity) (Object) this);
         ComponentTicker.LivingDeathMultipliers(victim, damageSource, ci);
 
