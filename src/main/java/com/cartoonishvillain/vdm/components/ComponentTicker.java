@@ -516,6 +516,19 @@ public class ComponentTicker {
                 livingEntity.level.addFreshEntity(itemEntity);
             }
         }
+    }
 
+    public static void wakeUpEvent(Player player, boolean updateWorld, boolean immediateWake){
+        LevelComponent h = LEVELINSTANCE.get(player.level.getLevelData());
+        if(!immediateWake && !player.level.isClientSide() && h.isRested()){
+            player.setHealth(player.getMaxHealth());
+            player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20*30, 0));
+            player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 20*30, 0));
+            player.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 20*30, 1));
+            player.addEffect(new MobEffectInstance(MobEffects.SATURATION, 20, 1));
+            EntityComponent i = ENTITYINSTANCE.get(player);
+            i.setBlackEyeStatus(false);
+            player.sendMessage(new TranslatableComponent("info.villainousdifficultymultipliers.rested").withStyle(ChatFormatting.GREEN), UUID.randomUUID());
+        }
     }
 }

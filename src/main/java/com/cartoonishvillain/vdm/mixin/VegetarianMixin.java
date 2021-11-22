@@ -20,7 +20,7 @@ import static com.cartoonishvillain.vdm.components.ComponentStarter.LEVELINSTANC
 @Mixin(Item.class)
 public class VegetarianMixin {
     @Inject(at = @At("HEAD"), method = "finishUsingItem")
-    private void finishUsingItem(ItemStack itemStack, Level level, LivingEntity livingEntity, CallbackInfoReturnable<ItemStack> cir){
+    private void vdmfinishUsingItem(ItemStack itemStack, Level level, LivingEntity livingEntity, CallbackInfoReturnable<ItemStack> cir){
 
         if(!level.isClientSide){
             LevelComponent component = LEVELINSTANCE.get(level.getLevelData());
