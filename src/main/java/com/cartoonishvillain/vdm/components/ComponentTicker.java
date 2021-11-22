@@ -55,7 +55,7 @@ import static com.cartoonishvillain.vdm.components.ComponentStarter.LEVELINSTANC
 public class ComponentTicker {
 
     //TODO:
-    // PlayerDestroyItemEvent, Finish Using Item, WorldTick, PlayerWakeUpEvent, Chat event
+    // WorldTick, PlayerWakeUpEvent, Chat event
 
     public static void LivingTickMethod(LivingEntity entity){
         LevelComponent h = LEVELINSTANCE.get(entity.level.getLevelData());

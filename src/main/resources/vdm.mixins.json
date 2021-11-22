@@ -21,6 +21,7 @@
     "PlayerTick",
     "RangedAttackGoalAccessor",
     "SkeletonAccessor",
+    "VegetarianMixin",
     "WorldJoinEventMixin"
   ],
   "client": [
