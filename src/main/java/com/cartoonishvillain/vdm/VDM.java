@@ -96,8 +96,8 @@ public class VDM implements ModInitializer {
 
 			if(world.isDay() && worldComponent.isNight()){
 				worldComponent.setisNight(false);
-				int chance =  world.getRandom().nextInt(9);
-				if (chance <= 1 && levelComponent.isCelebration())  {
+				int chance =  world.getRandom().nextInt(VDM.config.multiplierTweaks.celebrationchance);
+				if (chance <= 0 && levelComponent.isCelebration())  {
 					worldComponent.setCelebrationStatus(true);
 					ComponentTicker.broadcast(world.getServer(), new TranslatableComponent("info.villainousdifficultymultipliers.party").withStyle(ChatFormatting.LIGHT_PURPLE));
 				}

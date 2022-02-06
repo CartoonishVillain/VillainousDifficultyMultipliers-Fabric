@@ -260,7 +260,7 @@ public class ComponentTicker {
     }
 
     public static void Eruptive(Bee aggressor){
-        aggressor.level.explode(null, aggressor.getX(), aggressor.getY(), aggressor.getZ(), 4, Explosion.BlockInteraction.NONE);
+        aggressor.level.explode(null, aggressor.getX(), aggressor.getY(), aggressor.getZ(), VDM.config.multiplierTweaks.eruptiveswarmsize, Explosion.BlockInteraction.NONE);
 
     }
 
@@ -270,7 +270,7 @@ public class ComponentTicker {
 
     public static void Wild(LivingEntity victim, Player aggressor, DamageSource damageSource){
         if(!damageSource.isExplosion() && !damageSource.isFire() && aggressor != victim) {
-            if(victim.getRandom().nextInt(100) < 15){
+            if(victim.getRandom().nextInt(VDM.config.multiplierTweaks.wildchance) == 0){
                 aggressor.sendMessage(new TranslatableComponent("info.villainousdifficultymultipliers.wild").withStyle(ChatFormatting.DARK_PURPLE), UUID.randomUUID());
                 RandomAttackDecider.Activate(victim.level, aggressor, victim);
             }
@@ -353,7 +353,7 @@ public class ComponentTicker {
 
     public static void softSkin(Player entity, DamageSource source, float amount){
         if (!entity.isInvulnerableTo(source) && !source.isMagic()) {
-            amount = (float) (amount*0.5);
+            amount = (float) (amount*(VDM.config.multiplierTweaks.damagemultiplier - 1));
             entity.setHealth(entity.getHealth() - amount);
         }
 
@@ -361,7 +361,7 @@ public class ComponentTicker {
     }
 
     private static void agecheck(int age, LivingEntity livingEntity){
-        if(age >= 4) livingEntity.remove(Entity.RemovalReason.DISCARDED);
+        if(age >= VDM.config.multiplierTweaks.maximumage) livingEntity.remove(Entity.RemovalReason.DISCARDED);
     }
 
     private static Item MusicDisc(){
@@ -381,7 +381,7 @@ public class ComponentTicker {
         EntityType eType = e.getType();
         if(eType == EntityType.ENDERMAN || eType == EntityType.ZOMBIFIED_PIGLIN || eType == EntityType.WOLF || eType == EntityType.BEE || eType == EntityType.LLAMA){
             Random random = new Random();
-            int chance = random.nextInt(30);
+            int chance = random.nextInt(VDM.config.multiplierTweaks.wrongchance);
             if(chance <= 1) {
                 EntityComponent h = ENTITYINSTANCE.get(e);
                 h.setWrongStatus(true);
@@ -393,10 +393,10 @@ public class ComponentTicker {
     public static void Unstable(LivingEntity entity){
         if(entity.getType().equals(EntityType.GHAST)){
             Ghast ghast = (Ghast) entity;
-            ((GhastAccessor) ghast).vdmSetExplosive(5);
+            ((GhastAccessor) ghast).vdmSetExplosive(VDM.config.multiplierTweaks.unstableexplosionsize);
         } else if(entity.getType().equals(EntityType.CREEPER)){
             Creeper creeper = (Creeper) entity;
-            ((CreeperAccessor) creeper).vdmCSetExplosive(5);
+            ((CreeperAccessor) creeper).vdmCSetExplosive(VDM.config.multiplierTweaks.unstableexplosionsize);
         }
     }
 
@@ -448,14 +448,14 @@ public class ComponentTicker {
     }
 
     public static void Hardened(LivingEntity entity){
-        float health = (entity).getHealth() * 0.5f;
+        float health = (float) ((entity).getHealth() * (VDM.config.multiplierTweaks.hardenedboost - 1));
         AttributeInstance modifiableAttributeInstance = (entity).getAttribute(Attributes.MAX_HEALTH);
         if (modifiableAttributeInstance == null) {
             return;
         }
         if(modifiableAttributeInstance.getModifiers().size() == 0) {
             modifiableAttributeInstance.addTransientModifier(new AttributeModifier(UUID.fromString("D6F0BA2-1186-46AC-B896-C61C5CEE99CC"), "Hardened health boost", health, AttributeModifier.Operation.ADDITION));
-            (entity).setHealth((entity).getHealth() * 1.5f);
+            (entity).setHealth((float) ((entity).getHealth() * VDM.config.multiplierTweaks.hardenedboost));
         }
     }
 
@@ -463,9 +463,11 @@ public class ComponentTicker {
         EntityType eType = entity.getType();
         if(eType == EntityType.PIG || eType == EntityType.SHEEP || eType == EntityType.COW || eType == EntityType.MOOSHROOM || eType == EntityType.CHICKEN){
             Random random = new Random();
-            int chance = random.nextInt(20);
-            EntityComponent h = new EntityComponent(entity);
-            h.setRetaliationStatus(true);
+            int chance = random.nextInt(VDM.config.multiplierTweaks.karmicjusticechance);
+            if(chance == 0) {
+                EntityComponent h = ENTITYINSTANCE.get(entity);
+                h.setRetaliationStatus(true);
+            }
         }
     }
 

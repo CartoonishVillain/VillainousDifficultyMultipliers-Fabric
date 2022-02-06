@@ -11,10 +11,14 @@ public class VDMConfig implements ConfigData {
     @ConfigEntry.Gui.CollapsibleObject
     public DefaultMultipliers defaultMultipliers = new DefaultMultipliers();
 
+    @ConfigEntry.Gui.CollapsibleObject
+    public MultiplierTweaks multiplierTweaks = new MultiplierTweaks();
+
+
     public static class DefaultMultipliers{
         @Comment("Config options only apply on world creation for the fabric port! For later enabling or disabling in existing worlds, use the commands! /vdm help for more info!")
         public boolean notice = false;
-        @Comment("We all get old at some point. Upon breeding 4 times, animals and villagers will die of old age.")
+        @Comment("We all get old at some point. Upon breeding a finite number of times, animals and villagers will die of old age.")
         public boolean aging = false;
         @Comment("When you take damage, your ability to heal is nullified until you hit a monster or a player with a melee attack. Punch 'em in the chin!")
         public boolean blackeye = false;
@@ -22,11 +26,11 @@ public class VDMConfig implements ConfigData {
         public boolean cannon = false;
         @Comment("Phantoms are a lame punishment for lack of sleep. Enjoy debuffs and eventual death by lack of sleep with this modifier!")
         public boolean fatigue = false;
-        @Comment("There is a 1 in 20 chance any animal usually farmed for food will explode violently when a player hits them. Tread Lightly.")
+        @Comment("There is a chance any animal usually farmed for food will explode violently when a player hits them. Tread Lightly.")
         public boolean karmicjustice = false;
         @Comment("!!!Temporarily Disabled in Code!!! Fighting the same zombies gets old. Zombies are converted to drowned, husks, or zombie villagers instantly, skeletons are converted to strays instantly, and creepers are always supercharged.")
         public boolean shift = false;
-        @Comment("Your particularly soft skin makes you more vulnerable to damage. All incoming damage has an extra 50% added to it.")
+        @Comment("Your particularly soft skin makes you more vulnerable to damage. All incoming damage has an extra added to it.")
         public boolean softskin = false;
         @Comment("Cave spiders inflict poison for a brief moment on easy, and both wither and poison on normal and hard. Spiders also get the ability to poison you for a shorter amount of time.")
         public boolean venom = false;
@@ -66,6 +70,27 @@ public class VDMConfig implements ConfigData {
 
         @Comment("All living entities that harm you have a chance to infect you with Immortuos Calyx, even if they aren't infected themselves")
         public boolean pandemic = false;
+    }
+
+    public static class MultiplierTweaks {
+        @Comment("The amount of times a creature can breed before dying of old age with the aging multiplier enabled")
+        public int maximumage = 4;
+        @Comment("The health multiplier given to monsters when spawned while Hardened is enabled")
+        public double hardenedboost = 1.5;
+        @Comment("The multiplier given to damage taken by players when SoftSkin is enabled")
+        public double damagemultiplier = 1.5;
+        @Comment("Explosion size of creepers and ghast fireballs when Unstable is enabled")
+        public int unstableexplosionsize = 5;
+        @Comment("Explosion size of bees when Eruptive Swarm is enabled")
+        public int eruptiveswarmsize = 4;
+        @Comment("1 in X chance that a valid neutral mob will be effected by wrong when it is enabled.")
+        public int wrongchance = 30;
+        @Comment("1 in X chance that a valid passive mob will be effected by karmic justice when it is enabled.")
+        public int karmicjusticechance = 20;
+        @Comment("1 in X chance that an attack will invoke a wild effect when Wild is enabled.")
+        public int wildchance = 6;
+        @Comment("1 in X chance during the day to activate a celebration when it is enabled")
+        public int celebrationchance = 9;
     }
 
 }
