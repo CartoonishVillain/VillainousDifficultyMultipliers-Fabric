@@ -84,13 +84,16 @@ public class ComponentTicker {
 
 
 
-    public static void Aging(LivingEntity victim1, LivingEntity victim2){
-        EntityComponent h = ENTITYINSTANCE.get(victim1);
-        h.setAge(h.getAge()+1);
-        agecheck(h.getAge(), victim1);
-        h = ENTITYINSTANCE.get(victim2);
-        h.setAge(h.getAge()+1);
-        agecheck(h.getAge(), victim2);
+    public static void Aging(LivingEntity victim1, LivingEntity victim2) {
+        LevelComponent lh = LEVELINSTANCE.get(victim1.getLevel().getLevelData());
+        if (lh.isAging()) {
+            EntityComponent h = ENTITYINSTANCE.get(victim1);
+            h.setAge(h.getAge() + 1);
+            agecheck(h.getAge(), victim1);
+            h = ENTITYINSTANCE.get(victim2);
+            h.setAge(h.getAge() + 1);
+            agecheck(h.getAge(), victim2);
+        }
     }
 
     public static void LivingDamageMultipliers(LivingEntity victim, DamageSource source, float Amount){
@@ -133,7 +136,7 @@ public class ComponentTicker {
     public static void LivingDeathMultipliers(LivingEntity victim, DamageSource damageSource, CallbackInfo ci){
         LevelComponent h = LEVELINSTANCE.get(victim.level.getLevelData());
         if(!victim.level.isClientSide) {
-            if (victim instanceof Player && h.isUndying()){
+            if (victim instanceof Player && h.isUndying() && !damageSource.getMsgId().equals(DamageSource.OUT_OF_WORLD.msgId)){
                 ci.cancel();
                 undying((Player) victim);
             }
